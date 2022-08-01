@@ -1,13 +1,10 @@
-import { Embed, models, Page, Report, service } from 'powerbi-client';
+import { models, service } from 'powerbi-client';
 import { PowerBIEmbed } from 'powerbi-client-react';
 import 'powerbi-report-authoring';
 import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  // PowerBI Report object (to be received via callback)
-  const [report, setReport] = useState<Report>();
-
   // API end-point url to get embed config for a sample report
   const sampleReportUrl = 'https://playgroundbe-bck-1.azurewebsites.net/Reports/SampleReport';
 
@@ -67,7 +64,7 @@ function App() {
     setReportConfig({
       ...sampleReportConfig,
       embedUrl: reportConfig.embedUrl,
-      accessToken: reportConfig.embedToken,
+      accessToken: reportConfig.accessToken,
     });
   };
 
@@ -86,61 +83,6 @@ function App() {
     });
   };
 
-  // Delete the first visual using powerbi-report-authoring library
-  const deleteVisual = async () => {
-    if (!report) {
-      console.log('Report not available');
-      return;
-    }
-
-    const activePage = await getActivePage(report);
-
-    if (!activePage) {
-      console.log('No active page');
-      return;
-    }
-
-    // Get all visuals in the active page
-    const visuals = await activePage.getVisuals();
-
-    if (visuals.length === 0) {
-      console.log('No visual left');
-      return;
-    }
-
-    // Get first visible visual
-    const visual = visuals.find((v) => {
-      return v.layout.displayState?.mode === models.VisualContainerDisplayMode.Visible;
-    });
-
-    // No visible visual found
-    if (!visual) {
-      console.log('No visible visual available to delete');
-      return;
-    }
-
-    try {
-      // Documentation link: https://github.com/microsoft/powerbi-report-authoring/wiki/Visualization
-      // Delete the visual
-      await activePage.deleteVisual(visual.name);
-
-      console.log('Visual was deleted');
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  async function getActivePage(powerbiReport: Report): Promise<Page | undefined> {
-    const pages = await powerbiReport.getPages();
-
-    // Get the active page
-    const activePage = pages.filter(function (page) {
-      return page.isActive;
-    })[0];
-
-    return activePage;
-  }
-
   const [displayMessage, setMessage] = useState(`The report is bootstrapped. Click the Embed Report button to set the access token`);
 
   const controlButtons = (
@@ -148,8 +90,6 @@ function App() {
       <button onClick={mockSignIn}>Embed Report</button>
 
       <button onClick={changeSettings}>Hide filter pane</button>
-
-      <button onClick={deleteVisual}>Delete a Visual</button>
     </div>
   );
 
@@ -172,15 +112,7 @@ function App() {
     <div>
       {header}
 
-      <PowerBIEmbed
-        embedConfig={sampleReportConfig}
-        eventHandlers={eventHandlersMap}
-        cssClassName={'report-style-class'}
-        getEmbeddedComponent={(embedObject: Embed) => {
-          console.log(`Embedded object of type "${embedObject.embedtype}" received`);
-          setReport(embedObject as Report);
-        }}
-      />
+      <PowerBIEmbed embedConfig={sampleReportConfig} eventHandlers={eventHandlersMap} cssClassName={'report-style-class'} />
 
       <div className='hr'></div>
 
