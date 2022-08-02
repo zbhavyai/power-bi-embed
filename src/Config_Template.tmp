@@ -1,0 +1,7 @@
+// accessToken is actually called "Embed Token". Access Token is something different
+const reportConfig = {
+  embedUrl: 'EMBED_URL_HERE',
+  accessToken: 'EMBED_TOKEN_HERE',
+};
+
+export default reportConfig;
