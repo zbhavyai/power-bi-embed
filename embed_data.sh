@@ -2,15 +2,20 @@
 # Author: Bhavyai Gupta
 
 
-# form data
+# read the vault token
+VAULT_TOKEN=$( cat ./vault/vault_token.txt )
+
+# fetch data from vault
+username=$( curl -H "X-Vault-Token: ${VAULT_TOKEN}" -X GET http://127.0.0.1:8200/v1/secret/data/creds 2> /dev/null | jq '.data.data.email' )
+password=$( curl -H "X-Vault-Token: ${VAULT_TOKEN}" -X GET http://127.0.0.1:8200/v1/secret/data/creds 2> /dev/null | jq '.data.data.password' )
+
+# additional data for embedding report
 client_id=''
-grant_type='password'
-resource='https://analysis.windows.net/powerbi/api'
-username=''
-password=''
-scope='openid'
 group_id=''
 report_id=''
+scope='openid'
+grant_type='password'
+resource='https://analysis.windows.net/powerbi/api'
 
 
 # get the access token using email/password for subsequent requests
